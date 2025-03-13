@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "898304185713",
+    "project_id": "rtvd-110be",
+    "storage_bucket": "rtvd-110be.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:898304185713:android:9ac49164b08911aafc52d0",
+        "android_client_info": {
+          "package_name": "com.example.rtvd"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKcwT0TWsr8ow5rHekXqZdZbV3sJbz8rY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
