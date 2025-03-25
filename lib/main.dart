@@ -6,6 +6,7 @@ import 'firebase_options.dart';
 import 'models/event_model.dart';
 import 'package:intl/intl.dart';
 import 'test_firestore.dart';
+import 'alert_map_view.dart';
 
 void main() async {
   try {
@@ -176,10 +177,9 @@ class _EventListPageState extends State<EventListPage> {
 
       if (allEvents.isNotEmpty) {
         // Create custom QueryDocumentSnapshot-like objects
-        final customDocs =
-            allEvents
-                .map((data) => _CustomQueryDocumentSnapshot(data))
-                .toList();
+        final customDocs = allEvents
+            .map((data) => _CustomQueryDocumentSnapshot(data))
+            .toList();
 
         setState(() {
           eventDocs = customDocs;
@@ -220,223 +220,238 @@ class _EventListPageState extends State<EventListPage> {
   void _showEventDetails(BuildContext context, Event event) {
     showDialog(
       context: context,
-      builder:
-          (context) => Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: const Color(0xFF2D2D2D),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: const Color(0xFF2D2D2D),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.info_outline,
-                        color: Colors.deepPurple.shade200,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Detection Details #${event.id}',
-                        style: const TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                  Icon(
+                    Icons.info_outline,
+                    color: Colors.deepPurple.shade200,
                   ),
-                  Divider(color: Colors.deepPurple.shade700),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildDetailSection('Event Information', [
-                            if (event.message.isNotEmpty)
-                              _buildDetailRow('Message', event.message),
-                            _buildDetailRow('Status', event.status),
-                            _buildDetailRow(
-                              'Location',
-                              event.location.toString(),
-                            ),
-                            _buildDetailRow('Camera', event.camNo),
-                            _buildDetailRow(
-                              'Created At',
-                              DateFormat(
-                                'dd/MM/yy HH:mm',
-                              ).format(event.createdAt),
-                            ),
-                            _buildDetailRow(
-                              'Event Time',
-                              DateFormat(
-                                'dd/MM/yy HH:mm',
-                              ).format(event.eventTime),
-                            ),
-                          ]),
-                          if (event.alerts.isNotEmpty) ...[
-                            const SizedBox(height: 16),
-                            _buildDetailSection('Alerts', [
-                              for (var alert in event.alerts)
-                                Container(
-                                  margin: const EdgeInsets.only(bottom: 8),
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF1A1A1A),
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
-                                      color:
-                                          alert.status.toLowerCase() == 'red'
-                                              ? Colors.red.shade700
-                                              : Colors.orange.shade700,
-                                      width: 1,
-                                    ),
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.warning_amber_rounded,
-                                            size: 16,
-                                            color:
-                                                alert.status.toLowerCase() ==
-                                                        'red'
-                                                    ? Colors.red.shade300
-                                                    : Colors.orange.shade300,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Expanded(
-                                            child: Text(
-                                              alert.message,
-                                              style: TextStyle(
-                                                color: Colors.grey.shade300,
-                                              ),
-                                            ),
-                                          ),
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(
-                                              horizontal: 6,
-                                              vertical: 2,
-                                            ),
-                                            decoration: BoxDecoration(
-                                              color:
-                                                  alert.status.toLowerCase() ==
-                                                          'red'
-                                                      ? Colors.red.withOpacity(
-                                                        0.2,
-                                                      )
-                                                      : Colors.orange
-                                                          .withOpacity(0.2),
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: Text(
-                                              alert.status.toUpperCase(),
-                                              style: TextStyle(
-                                                fontSize: 10,
-                                                color:
-                                                    alert.status
-                                                                .toLowerCase() ==
-                                                            'red'
-                                                        ? Colors.red.shade300
-                                                        : Colors
-                                                            .orange
-                                                            .shade300,
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'Alert Time: ${DateFormat('HH:mm').format(alert.alertTime)}',
-                                        style: TextStyle(
-                                          color: Colors.grey.shade500,
-                                          fontSize: 12,
-                                        ),
-                                      ),
-                                      if (alert.users.isNotEmpty) ...[
-                                        const SizedBox(height: 8),
-                                        for (var user in alert.users)
-                                          Container(
-                                            margin: const EdgeInsets.only(
-                                              top: 4,
-                                            ),
-                                            padding: const EdgeInsets.all(4),
-                                            decoration: BoxDecoration(
-                                              color: Colors.black12,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  user.name,
-                                                  style: TextStyle(
-                                                    color: Colors.grey.shade300,
-                                                    fontWeight: FontWeight.w500,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  'Email: ${user.email}',
-                                                  style: TextStyle(
-                                                    color: Colors.grey.shade400,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                                Text(
-                                                  'Phone: ${user.phone}',
-                                                  style: TextStyle(
-                                                    color: Colors.grey.shade400,
-                                                    fontSize: 12,
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                      ],
-                                    ],
-                                  ),
-                                ),
-                            ]),
-                          ],
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: TextButton(
-                      style: TextButton.styleFrom(
-                        backgroundColor: Colors.deepPurple.shade400,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                      ),
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Close'),
+                  const SizedBox(width: 8),
+                  Text(
+                    'Detection Details #${event.id}',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ],
               ),
-            ),
+              Divider(color: Colors.deepPurple.shade700),
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildDetailSection('Event Information', [
+                        if (event.message.isNotEmpty)
+                          _buildDetailRow('Message', event.message),
+                        _buildDetailRow('Status', event.status),
+                        _buildDetailRow(
+                          'Location',
+                          event.location.toString(),
+                        ),
+                        _buildDetailRow('Camera', event.camNo),
+                        _buildDetailRow(
+                          'Created At',
+                          DateFormat(
+                            'dd/MM/yy HH:mm',
+                          ).format(event.createdAt),
+                        ),
+                        _buildDetailRow(
+                          'Event Time',
+                          DateFormat(
+                            'dd/MM/yy HH:mm',
+                          ).format(event.eventTime),
+                        ),
+                      ]),
+                      if (event.alerts.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        _buildDetailSection('Alerts', [
+                          for (var alert in event.alerts)
+                            Container(
+                              margin: const EdgeInsets.only(bottom: 8),
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF1A1A1A),
+                                borderRadius: BorderRadius.circular(4),
+                                border: Border.all(
+                                  color: alert.status.toLowerCase() == 'red'
+                                      ? Colors.red.shade700
+                                      : Colors.orange.shade700,
+                                  width: 1,
+                                ),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Icon(
+                                        Icons.warning_amber_rounded,
+                                        size: 16,
+                                        color:
+                                            alert.status.toLowerCase() == 'red'
+                                                ? Colors.red.shade300
+                                                : Colors.orange.shade300,
+                                      ),
+                                      const SizedBox(width: 8),
+                                      Expanded(
+                                        child: Text(
+                                          alert.message,
+                                          style: TextStyle(
+                                            color: Colors.grey.shade300,
+                                          ),
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 6,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: alert.status.toLowerCase() ==
+                                                  'red'
+                                              ? Colors.red.withOpacity(
+                                                  0.2,
+                                                )
+                                              : Colors.orange.withOpacity(0.2),
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Text(
+                                          alert.status.toUpperCase(),
+                                          style: TextStyle(
+                                            fontSize: 10,
+                                            color: alert.status.toLowerCase() ==
+                                                    'red'
+                                                ? Colors.red.shade300
+                                                : Colors.orange.shade300,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Alert Time: ${DateFormat('HH:mm').format(alert.alertTime)}',
+                                    style: TextStyle(
+                                      color: Colors.grey.shade500,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  if (alert.users.isNotEmpty) ...[
+                                    const SizedBox(height: 8),
+                                    for (var user in alert.users)
+                                      Container(
+                                        margin: const EdgeInsets.only(
+                                          top: 4,
+                                        ),
+                                        padding: const EdgeInsets.all(4),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black12,
+                                          borderRadius:
+                                              BorderRadius.circular(4),
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              user.name,
+                                              style: TextStyle(
+                                                color: Colors.grey.shade300,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Email: ${user.email}',
+                                              style: TextStyle(
+                                                color: Colors.grey.shade400,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            Text(
+                                              'Phone: ${user.phone}',
+                                              style: TextStyle(
+                                                color: Colors.grey.shade400,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                  ],
+                                  const SizedBox(height: 12),
+                                  ElevatedButton.icon(
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => AlertMapView(
+                                            event: event,
+                                            alert: alert,
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                    icon: const Icon(Icons.map),
+                                    label: const Text('View on Map'),
+                                    style: ElevatedButton.styleFrom(
+                                      backgroundColor:
+                                          Colors.deepPurple.shade400,
+                                      foregroundColor: Colors.white,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 16,
+                                        vertical: 8,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ]),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.deepPurple.shade400,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 8,
+                    ),
+                  ),
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
+              ),
+            ],
           ),
+        ),
+      ),
     );
   }
 
@@ -481,16 +496,13 @@ class _EventListPageState extends State<EventListPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           print('Force refresh with cache clearing');
-          FirebaseFirestore.instance
-              .clearPersistence()
-              .then((_) {
-                print('Persistence cleared');
-                _loadFirestoreData();
-              })
-              .catchError((error) {
-                print('Error clearing persistence: $error');
-                _loadFirestoreData();
-              });
+          FirebaseFirestore.instance.clearPersistence().then((_) {
+            print('Persistence cleared');
+            _loadFirestoreData();
+          }).catchError((error) {
+            print('Error clearing persistence: $error');
+            _loadFirestoreData();
+          });
         },
         icon: const Icon(Icons.refresh, color: Colors.white),
         label: const Text(
@@ -514,19 +526,18 @@ class _EventListPageState extends State<EventListPage> {
         ),
         child: AnimatedSwitcher(
           duration: const Duration(milliseconds: 300),
-          child:
-              isLoading
-                  ? const Center(
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3,
-                      backgroundColor: Color(0xFF2D2D2D),
-                    ),
-                  )
-                  : errorMessage.isNotEmpty
+          child: isLoading
+              ? const Center(
+                  child: CircularProgressIndicator(
+                    strokeWidth: 3,
+                    backgroundColor: Color(0xFF2D2D2D),
+                  ),
+                )
+              : errorMessage.isNotEmpty
                   ? _buildErrorView()
                   : eventDocs.isEmpty
-                  ? _buildEmptyView()
-                  : _buildEventsList(eventDocs),
+                      ? _buildEmptyView()
+                      : _buildEventsList(eventDocs),
         ),
       ),
     );
@@ -634,10 +645,9 @@ class _EventListPageState extends State<EventListPage> {
                   decoration: BoxDecoration(
                     border: Border(
                       left: BorderSide(
-                        color:
-                            event.status.toLowerCase() == 'pending'
-                                ? Color(0xFFFFB74D)
-                                : Color(0xFF4CAF50),
+                        color: event.status.toLowerCase() == 'pending'
+                            ? Color(0xFFFFB74D)
+                            : Color(0xFF4CAF50),
                         width: 4,
                       ),
                     ),
@@ -659,10 +669,9 @@ class _EventListPageState extends State<EventListPage> {
                             ),
                             child: Icon(
                               Icons.warning_amber_rounded,
-                              color:
-                                  event.status.toLowerCase() == 'pending'
-                                      ? Color(0xFFFFB74D)
-                                      : Color(0xFF4CAF50),
+                              color: event.status.toLowerCase() == 'pending'
+                                  ? Color(0xFFFFB74D)
+                                  : Color(0xFF4CAF50),
                               size: 24,
                             ),
                           ),
@@ -706,19 +715,17 @@ class _EventListPageState extends State<EventListPage> {
                                   .withOpacity(0.1),
                               borderRadius: BorderRadius.circular(20),
                               border: Border.all(
-                                color:
-                                    event.status.toLowerCase() == 'pending'
-                                        ? Color(0xFFFFB74D).withOpacity(0.5)
-                                        : Color(0xFF4CAF50).withOpacity(0.5),
+                                color: event.status.toLowerCase() == 'pending'
+                                    ? Color(0xFFFFB74D).withOpacity(0.5)
+                                    : Color(0xFF4CAF50).withOpacity(0.5),
                               ),
                             ),
                             child: Text(
                               event.status.toUpperCase(),
                               style: TextStyle(
-                                color:
-                                    event.status.toLowerCase() == 'pending'
-                                        ? Color(0xFFFFB74D)
-                                        : Color(0xFF4CAF50),
+                                color: event.status.toLowerCase() == 'pending'
+                                    ? Color(0xFFFFB74D)
+                                    : Color(0xFF4CAF50),
                                 fontWeight: FontWeight.w600,
                                 fontSize: 12,
                                 letterSpacing: 0.5,
@@ -889,31 +896,30 @@ class _EventListPageState extends State<EventListPage> {
                 onPressed: () {
                   showDialog(
                     context: context,
-                    builder:
-                        (context) => AlertDialog(
-                          backgroundColor: Theme.of(context).cardColor,
-                          title: Text(
-                            'Raw Data for ${doc.id}',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                          content: SingleChildScrollView(
-                            child: Text(
-                              data.toString(),
-                              style: TextStyle(color: Colors.grey.shade300),
-                            ),
-                          ),
-                          actions: [
-                            TextButton(
-                              style: TextButton.styleFrom(
-                                backgroundColor:
-                                    Theme.of(context).colorScheme.primary,
-                                foregroundColor: Colors.white,
-                              ),
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text('Close'),
-                            ),
-                          ],
+                    builder: (context) => AlertDialog(
+                      backgroundColor: Theme.of(context).cardColor,
+                      title: Text(
+                        'Raw Data for ${doc.id}',
+                        style: const TextStyle(color: Colors.white),
+                      ),
+                      content: SingleChildScrollView(
+                        child: Text(
+                          data.toString(),
+                          style: TextStyle(color: Colors.grey.shade300),
                         ),
+                      ),
+                      actions: [
+                        TextButton(
+                          style: TextButton.styleFrom(
+                            backgroundColor:
+                                Theme.of(context).colorScheme.primary,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Close'),
+                        ),
+                      ],
+                    ),
                   );
                 },
               ),
